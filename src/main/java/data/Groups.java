@@ -8,4 +8,5 @@ public final class Groups {
     public static final String DEPRECATED = "deprecated";
 
     public static final String LOGIN = "login";
+    public static final String INVENTORY = "inventory";
 }

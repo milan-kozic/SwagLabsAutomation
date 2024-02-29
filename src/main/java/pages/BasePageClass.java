@@ -1,14 +1,16 @@
 package pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import data.Time;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.LoggerUtils;
+import utils.WebDriverUtils;
 
 import java.time.Duration;
+import java.util.List;
 
 public abstract class BasePageClass {
 
@@ -16,6 +18,7 @@ public abstract class BasePageClass {
 
     protected BasePageClass(WebDriver driver) {
         this.driver = driver;
+        PageFactory.initElements(driver, this);
     }
 
     protected void openUrl(String url) {
@@ -37,10 +40,25 @@ public abstract class BasePageClass {
         return driver.findElement(locator);
     }
 
+    protected List<WebElement> getWebElements(By locator) {
+        LoggerUtils.log.trace("getWebElements(" + locator + ")");
+        return driver.findElements(locator);
+    }
+
     protected WebElement getWebElement(By locator, int timeout) {
         LoggerUtils.log.trace("getWebElement(" + locator + ", " + timeout + ")");
         WebDriverWait wait = getWebDriverWait(timeout);
         return wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+    }
+
+    protected WebElement getNestedWebElement(WebElement parentWebElement, By locator) {
+        LoggerUtils.log.trace("getNestedWebElement(" + parentWebElement + ", " + locator + ")");
+        return parentWebElement.findElement(locator);
+    }
+
+    protected List<WebElement> getNestedWebElements(WebElement parentWebElement, By locator) {
+        LoggerUtils.log.trace("getNestedWebElements(" + parentWebElement + ", " + locator + ")");
+        return parentWebElement.findElements(locator);
     }
 
     protected WebElement waitForWebElementToBeVisible(By locator, int timeout) {
@@ -100,6 +118,15 @@ public abstract class BasePageClass {
         }
     }
 
+    protected boolean isWebElementDisplayed(By locator, int timeout) {
+        try {
+            WebElement element = getWebElement(locator, timeout);
+            return element.isDisplayed();
+        } catch (NoSuchElementException e) {
+            return false;
+        }
+    }
+
     protected boolean isWebElementDisplayed(WebElement element) {
         LoggerUtils.log.trace("isWebElementDisplayed(" + element + ")");
         try {
@@ -107,6 +134,14 @@ public abstract class BasePageClass {
         } catch (NoSuchElementException e) {
             return false;
         }
+    }
+
+    protected boolean isWebElementDisplayed(WebElement element, int timeout) {
+        LoggerUtils.log.trace("isWebElementDisplayed(" + element + ", " + timeout + ")");
+        WebDriverUtils.setImplicitWait(driver, timeout);
+        boolean isDisplayed = isWebElementDisplayed(element);
+        WebDriverUtils.setImplicitWait(driver, Time.IMPLICIT_TIMEOUT);
+        return isDisplayed;
     }
 
     protected boolean isWebElementEnabled(WebElement element) {
@@ -139,6 +174,12 @@ public abstract class BasePageClass {
         webElement.click();
     }
 
+    protected void clickOnWebElementJS(WebElement element) {
+        LoggerUtils.log.trace("clickOnWebElementJS(" + element + ")");
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].click();", element);
+    }
+
     protected void typeTextToWebElement(WebElement element, String text) {
         LoggerUtils.log.trace("typeTextToWebElement(" + element + ", " + text + ")");
         element.sendKeys(text);
@@ -155,8 +196,20 @@ public abstract class BasePageClass {
         return element.getText();
     }
 
-    private String getAttributeFromWebElement(WebElement element, String attribute) {
+    protected String getAttributeFromWebElement(WebElement element, String attribute) {
         return element.getAttribute(attribute);
+    }
+
+    protected void setAttributeToWebElement(WebElement element, String attribute, String value) {
+        LoggerUtils.log.trace("setAttributeToWebElement(" + element + ", " + attribute + ", " + value + ")");
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].setAttribute('" + attribute + "', '" + value + "')", element);
+    }
+
+    protected void removeAttributeFromWebElement(WebElement element, String attribute) {
+        LoggerUtils.log.trace("removeAttributeFromWebElement(" + element + ", " + attribute + ")");
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].removeAttribute('" + attribute + "')", element);
     }
 
     protected String getValueFromWebElement(WebElement element) {
@@ -164,10 +217,41 @@ public abstract class BasePageClass {
         return getAttributeFromWebElement(element, "value");
     }
 
+    protected String getValueFromWebElementJS(WebElement element) {
+        LoggerUtils.log.trace("getValueFromWebElementJS(" + element + ")");
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        return (String) js.executeScript("return arguments[0].value", element);
+    }
+
     protected String getPlaceholderFromWebElement(WebElement element) {
         LoggerUtils.log.trace("getPlaceholderFromWebElement(" + element + ")");
         return getAttributeFromWebElement(element, "placeholder");
     }
 
+    protected void selectOptionOnWebElement(WebElement element, String option) {
+        LoggerUtils.log.trace("selectOptionOnWebElement(" + element + ", " + option + ")");
+        Select options = new Select(element);
+        options.selectByVisibleText(option);
+    }
 
+    protected boolean isOptionPresentOnWebElement(WebElement element, String option) {
+        LoggerUtils.log.trace("isOptionPresentOnWebElement(" + element + ", " + option + ")");
+        Select options = new Select(element);
+        List<WebElement> listOfOptions = options.getOptions();
+        boolean bPresent = false;
+        for (WebElement e : listOfOptions) {
+            if (getValueFromWebElement(e).equals(option)) {
+                bPresent = true;
+                break;
+            }
+        }
+        return bPresent;
+    }
+
+    protected String getFirstSelectedOptionOnWebElement(WebElement element) {
+        LoggerUtils.log.trace("getFirstSelectedOptionOnWebElement(" + element + ")");
+        Select options = new Select(element);
+        WebElement selectedOption = options.getFirstSelectedOption();
+        return selectedOption.getText();
+    }
 }

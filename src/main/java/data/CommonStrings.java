@@ -7,7 +7,6 @@ import java.util.Properties;
 
 public final class CommonStrings {
 
-    // locale_en.loc
     public static final String sLocaleFilePath = "locale_" + PropertiesUtils.getLocale() + ".loc";
     public static Properties locale = PropertiesUtils.loadPropertiesFile(sLocaleFilePath);
 

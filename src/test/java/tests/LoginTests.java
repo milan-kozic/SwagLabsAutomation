@@ -6,14 +6,14 @@ import data.Time;
 import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import pages.InventoryItemPage;
 import pages.InventoryPage;
 import pages.LoginPage;
-import utils.DateTimeUtils;
-import utils.LoggerUtils;
-import utils.PropertiesUtils;
-import utils.WebDriverUtils;
+import utils.*;
 
-@Test(groups = {Groups.REGRESSION, Groups.LOGIN})
+// This test class is now deprecated since we are using "one test case -> one test class -> one test method" approach
+@Deprecated
+//@Test(groups = {Groups.REGRESSION, Groups.LOGIN})
 public class LoginTests {
 
 //    WebDriver driver = null;
@@ -26,15 +26,18 @@ public class LoginTests {
 //        DateTimeUtils.wait(3);
 //    }
 
-    @Test(groups = {Groups.SANITY})
+    //@Test(groups = {Groups.SANITY})
     public void testSuccessfulLogin() {
 
-        LoggerUtils.log.info("[SETUP TEST] testSuccessfulLogin()");
+        final String sTestName = "testSuccessfulLogin";
+        LoggerUtils.log.info("[SETUP TEST] " + sTestName);
+
         WebDriver driver = WebDriverUtils.setUpDriver();
+        boolean bSuccess = false;
 
         try {
 
-            LoggerUtils.log.info("[START TEST] testSuccessfulLogin()");
+            LoggerUtils.log.info("[START TEST] " + sTestName);
 
             String sUsername = PropertiesUtils.getUsername();
             String sPassword = PropertiesUtils.getPassword();
@@ -55,22 +58,29 @@ public class LoginTests {
 
             String sActualInventoryPageTitle = inventoryPage.getInventoryPageTitle();
             Assert.assertEquals(sActualInventoryPageTitle, sExpectedInventoryPageTitle, "Wrong Page Title!");
+            bSuccess = true;
 
         } finally {
-            LoggerUtils.log.info("[END TEST] testSuccessfulLogin()");
+            LoggerUtils.log.info("[END TEST] " + sTestName);
+            if(!bSuccess) {
+                ScreenShotUtils.takeScreenShot(driver, sTestName);
+            }
             WebDriverUtils.quitDriver(driver);
         }
     }
 
-    @Test
+    //@Test
     public void testUnsuccessfulLoginWrongPassword() {
 
-        LoggerUtils.log.info("[SETUP TEST] testUnsuccessfulLoginWrongPassword()");
+        final String sTestName = "testUnsuccessfulLoginWrongPassword";
+        LoggerUtils.log.info("[SETUP TEST] " + sTestName);
+
         WebDriver driver = WebDriverUtils.setUpDriver();
+        boolean bSuccess = false;
 
         try{
 
-            LoggerUtils.log.info("[START TEST] testUnsuccessfulLoginWrongPassword()");
+            LoggerUtils.log.info("[START TEST] " + sTestName);
 
             String sUsername = PropertiesUtils.getUsername();
             String sPassword = "wrong_password";
@@ -78,6 +88,7 @@ public class LoginTests {
             String sExpectedLoginErrorMessage = CommonStrings.getLoginErrorMessageWrongCredentials();
 
             LoginPage loginPage = new LoginPage(driver).open();
+            DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
 
             loginPage.typeUsername(sUsername);
             DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
@@ -92,9 +103,60 @@ public class LoginTests {
 
             String sActualErrorMessage = loginPage.getLoginErrorMessage();
             Assert.assertEquals(sActualErrorMessage, sExpectedLoginErrorMessage, "Wrong Error Message");
+            bSuccess = true;
 
         } finally {
-            LoggerUtils.log.info("[END TEST] testUnsuccessfulLoginWrongPassword()");
+            LoggerUtils.log.info("[END TEST] " + sTestName);
+            if(!bSuccess) {
+                ScreenShotUtils.takeScreenShot(driver, sTestName);
+            }
+            WebDriverUtils.quitDriver(driver);
+        }
+    }
+
+    //@Test
+    public void testVerifyInventoryItem() {
+
+        final String sTestName = "testVerifyInventoryItem";
+        LoggerUtils.log.info("[SETUP TEST] " + sTestName);
+
+        WebDriver driver = WebDriverUtils.setUpDriver();
+        boolean bSuccess = false;
+
+        try{
+
+            LoggerUtils.log.info("[START TEST] " + sTestName);
+
+            String sUsername = PropertiesUtils.getUsername();
+            String sPassword = PropertiesUtils.getPassword();
+
+            String sInventoryItemName = "Sauce Labs Onesie";
+            String sExpectedInventoryItemPrice = "$7.99";
+
+            LoginPage loginPage = new LoginPage(driver).open();
+            DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
+
+            loginPage.typeUsername(sUsername);
+            DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
+
+            loginPage.typePassword(sPassword);
+            DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
+
+            InventoryPage inventoryPage = loginPage.clickLoginButton();
+            DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
+
+            String sInventoryItemPrice = inventoryPage.getInventoryItemPrice(sInventoryItemName);
+            Assert.assertEquals(sInventoryItemPrice, sExpectedInventoryItemPrice, "Wrong Inventory Item Price");
+
+            InventoryItemPage inventoryItemPage = inventoryPage.clickInventoryItemName(sInventoryItemName);
+            DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
+            bSuccess = true;
+
+        } finally {
+            LoggerUtils.log.info("[END TEST] " + sTestName);
+            if(!bSuccess) {
+                ScreenShotUtils.takeScreenShot(driver, sTestName);
+            }
             WebDriverUtils.quitDriver(driver);
         }
     }
@@ -105,4 +167,5 @@ public class LoginTests {
 //            driver.quit();
 //        }
 //    }
+
 }

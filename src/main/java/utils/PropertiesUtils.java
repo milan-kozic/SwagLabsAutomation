@@ -2,16 +2,12 @@ package utils;
 
 import org.testng.Assert;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.Properties;
 
 public class PropertiesUtils {
 
     private static final String sPropertiesPath = "test.properties";
-    //private static final String sPropertiesPath = System.getProperty("user.dir") + "\\src\\main\\resources\\test.properties";
     private static final Properties properties = loadPropertiesFile();
 
     public static Properties loadPropertiesFile(String sFilePath) {
@@ -45,6 +41,10 @@ public class PropertiesUtils {
 
     public static String getDriversFolder() {
         return getProperty("driversFolder");
+    }
+
+    public static String getScreenShotsFolder() {
+        return getProperty("screenshotsFolder");
     }
 
     public static String getEnvironment() {

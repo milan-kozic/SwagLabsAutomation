@@ -2,9 +2,9 @@ package pages;
 
 import data.PageUrlPaths;
 import data.Time;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.testng.Assert;
 import utils.LoggerUtils;
 import utils.PropertiesUtils;
@@ -13,10 +13,26 @@ public class LoginPage extends BasePageClass {
 
     private final String LOGIN_PAGE_URL = PropertiesUtils.getBaseUrl() + PageUrlPaths.LOGIN_PAGE;
 
+    /*
+     * Instead of By locators, we will use Page Factory
+     *
     private final By usernameTextFieldLocator = By.id("user-name");
     private final By passwordTextFieldLocator = By.id("password");
     private final By loginButtonLocator = By.id("login-button");
     private final By loginErrorMessageLocator = By.xpath("//h3[@data-test='error']");
+    */
+
+    @FindBy(id="user-name")
+    private WebElement usernameTextField;
+
+    @FindBy(id="password")
+    private WebElement passwordTextField;
+
+    @FindBy(id="login-button")
+    private WebElement loginButton;
+
+    @FindBy(xpath="//h3[@data-test='error']")
+    private WebElement loginErrorMessage;
 
     public LoginPage(WebDriver driver) {
         super(driver);
@@ -39,95 +55,84 @@ public class LoginPage extends BasePageClass {
 
     public boolean isUsernameTextFieldDisplayed() {
         LoggerUtils.log.debug("isUsernameTextFieldDisplayed()");
-        return isWebElementDisplayed(usernameTextFieldLocator);
+        return isWebElementDisplayed(usernameTextField);
     }
 
     public boolean isUsernameTextFieldEnabled() {
         LoggerUtils.log.debug("isUsernameTextFieldEnabled()");
         Assert.assertTrue(isUsernameTextFieldDisplayed(), "Username TextField is NOT displayed on Login Page!");
-        WebElement usernameTextField = getWebElement(usernameTextFieldLocator);
         return isWebElementEnabled(usernameTextField);
     }
 
     public String getUsername() {
         LoggerUtils.log.debug("getUsername()");
         Assert.assertTrue(isUsernameTextFieldDisplayed(), "Username TextField is NOT displayed on Login Page!");
-        WebElement usernameTextField = getWebElement(usernameTextFieldLocator);
-        return getValueFromWebElement(usernameTextField);
+        return getValueFromWebElementJS(usernameTextField);
     }
 
     public String getUsernamePlaceholder() {
         LoggerUtils.log.debug("getUsernamePlaceholder()");
         Assert.assertTrue(isUsernameTextFieldDisplayed(), "Username TextField is NOT displayed on Login Page!");
-        WebElement usernameTextField = getWebElement(usernameTextFieldLocator);
         return getPlaceholderFromWebElement(usernameTextField);
     }
 
     public LoginPage typeUsername(String sUsername) {
         LoggerUtils.log.debug("typeUsername(" + sUsername + ")");
         Assert.assertTrue(isUsernameTextFieldEnabled(), "Username TextField is NOT enabled on Login Page!");
-        WebElement usernameTextField = getWebElement(usernameTextFieldLocator);
         clearAndTypeTextToWebElement(usernameTextField, sUsername);
         return this;
     }
 
     public boolean isPasswordTextFieldDisplayed() {
         LoggerUtils.log.debug("isPasswordTextFieldDisplayed()");
-        return isWebElementDisplayed(passwordTextFieldLocator);
+        return isWebElementDisplayed(passwordTextField);
     }
 
     public boolean isPasswordTextFieldEnabled() {
         LoggerUtils.log.debug("isPasswordTextFieldEnabled()");
         Assert.assertTrue(isPasswordTextFieldDisplayed(), "Password TextField is NOT displayed on Login Page!");
-        WebElement passwordTextField = getWebElement(passwordTextFieldLocator);
         return isWebElementEnabled(passwordTextField);
     }
 
     public String getPassword() {
         LoggerUtils.log.debug("getPassword()");
         Assert.assertTrue(isPasswordTextFieldDisplayed(), "Password TextField is NOT displayed on Login Page!");
-        WebElement passwordTextField = getWebElement(passwordTextFieldLocator);
         return getValueFromWebElement(passwordTextField);
     }
 
     public String getPasswordPlaceholder() {
         LoggerUtils.log.debug("getPasswordPlaceholder()");
         Assert.assertTrue(isPasswordTextFieldDisplayed(), "Password TextField is NOT displayed on Login Page!");
-        WebElement passwordTextField = getWebElement(passwordTextFieldLocator);
         return getPlaceholderFromWebElement(passwordTextField);
     }
 
     public LoginPage typePassword(String sPassword) {
         LoggerUtils.log.debug("typePassword(" + sPassword + ")");
         Assert.assertTrue(isPasswordTextFieldEnabled(), "Password TextField is NOT enabled on Login Page!");
-        WebElement passwordTextField = getWebElement(passwordTextFieldLocator);
         clearAndTypeTextToWebElement(passwordTextField, sPassword);
         return this;
     }
 
     public boolean isLoginButtonDisplayed() {
         LoggerUtils.log.debug("isLoginButtonDisplayed()");
-        return isWebElementDisplayed(loginButtonLocator);
+        return isWebElementDisplayed(loginButton, Time.TIME_SHORTEST);
     }
 
     public boolean isLoginButtonEnabled() {
         LoggerUtils.log.debug("isLoginButtonEnabled()");
         Assert.assertTrue(isLoginButtonDisplayed(), "Login Button is NOT displayed on Login Page!");
-        WebElement loginButton = getWebElement(loginButtonLocator);
         return isWebElementEnabled(loginButton, Time.TIME_SHORTEST);
     }
 
     public String getLoginButtonTitle() {
         LoggerUtils.log.debug("getLoginButtonTitle()");
         Assert.assertTrue(isLoginButtonDisplayed(), "Login Button is NOT displayed on Login Page!");
-        WebElement loginButton = getWebElement(loginButtonLocator);
         return getValueFromWebElement(loginButton);
     }
 
     private void clickLoginButtonNoVerification() {
         Assert.assertTrue(isLoginButtonEnabled(), "Login Button is NOT enabled on Login Page!");
-        WebElement loginButton = getWebElement(loginButtonLocator);
-        clickOnWebElement(loginButton);
+        clickOnWebElementJS(loginButton);
     }
 
     public InventoryPage clickLoginButton() {
@@ -147,13 +152,12 @@ public class LoginPage extends BasePageClass {
 
     public boolean isLoginErrorMessageDisplayed() {
         LoggerUtils.log.debug("isLoginErrorMessageDisplayed()");
-        return isWebElementDisplayed(loginErrorMessageLocator);
+        return isWebElementDisplayed(loginErrorMessage);
     }
 
     public String getLoginErrorMessage() {
         LoggerUtils.log.debug("getLoginErrorMessage()");
         Assert.assertTrue(isLoginErrorMessageDisplayed(), "Login Error Message is NOT displayed on Login Page!");
-        WebElement loginErrorMessage = getWebElement(loginErrorMessageLocator);
         return getTextFromWebElement(loginErrorMessage);
     }
 
@@ -162,4 +166,18 @@ public class LoginPage extends BasePageClass {
         waitForUrlChangeToExactUrl(LOGIN_PAGE_URL, Time.TIME_SHORTER);
         return this;
     }
+
+    /**
+     * Login to SauceDemo with specified user
+     * @param sUsername {String} Username
+     * @param sPassword {String} Password
+     * @return {InventoryPage} New instance of InventoryPage
+     */
+    public InventoryPage login(String sUsername, String sPassword) {
+        LoggerUtils.log.info("login(" + sUsername + ", " + sPassword + ")");
+        typeUsername(sUsername);
+        typePassword(sPassword);
+        return clickLoginButton();
+    }
+
 }

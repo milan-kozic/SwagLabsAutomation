@@ -14,10 +14,11 @@ public class WebDriverUtils extends LoggerUtils {
     public static WebDriver setUpDriver() {
 
         String sBrowser = PropertiesUtils.getBrowser();
-        //String sDriverFolder = PropertiesUtils.getDriversFolder();
-        //String sPathDriverChrome = sDriverFolder + "chromedriver.exe";
-        //String sPathDriverFirefox = sDriverFolder + "geckodriver.exe";
-        //String sPathDriverEdge = sDriverFolder + "msedgedriver.exe";
+
+        // String sDriverFolder = PropertiesUtils.getDriversFolder();
+        // String sPathDriverChrome = sDriverFolder + "chromedriver.exe";
+        // String sPathDriverFirefox = sDriverFolder + "geckodriver.exe";
+        // String sPathDriverEdge = sDriverFolder + "msedgedriver.exe";
 
         WebDriver driver = null;
 
@@ -25,17 +26,17 @@ public class WebDriverUtils extends LoggerUtils {
 
         switch(sBrowser) {
             case "chrome" : {
-                //System.setProperty("webdriver.chrome.driver", sPathDriverChrome);
+                // System.setProperty("webdriver.chrome.driver", sPathDriverChrome);
                 driver = new ChromeDriver();
                 break;
             }
             case "firefox" : {
-                //System.setProperty("webdriver.gecko.driver", sPathDriverFirefox);
+                // System.setProperty("webdriver.gecko.driver", sPathDriverFirefox);
                 driver = new FirefoxDriver();
                 break;
             }
             case "edge" : {
-                //System.setProperty("webdriver.edge.driver", sPathDriverEdge);
+                // System.setProperty("webdriver.edge.driver", sPathDriverEdge);
                 driver = new EdgeDriver();
                 break;
             }
@@ -50,7 +51,7 @@ public class WebDriverUtils extends LoggerUtils {
 
         // Maximize Browser
         driver.manage().window().maximize();
-        DateTimeUtils.wait(Time.TIME_SHORTER);
+        DateTimeUtils.wait(Time.TIME_DEMONSTRATION);
 
         return driver;
     }
@@ -62,4 +63,9 @@ public class WebDriverUtils extends LoggerUtils {
             driver.quit();
         }
     }
+
+    public static void setImplicitWait(WebDriver driver, int timeout) {
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(timeout));
+    }
+
 }
